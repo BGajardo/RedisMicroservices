@@ -1,3 +1,18 @@
+server:
+  port: 8082
+
 spring:
   application:
     name: DataService
+  datasource:
+    url: jdbc:postgresql://localhost:5432/datadb
+    username: admin
+    password: admin123
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+
+jwt:
+  secret: la-clave-secreta-de-jwt-1234-con-minimo-de-32-caracteres

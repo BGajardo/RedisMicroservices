@@ -32,6 +32,7 @@
 	<packaging>pom</packaging>
 	<modules>
 			<module>AuthService</module>
+			<module>DataService</module>
 	</modules>
 	<dependencies>
 		<dependency>

@@ -11,6 +11,7 @@ spring:
     password: admin123
 
   jpa:
+    generate-ddl: true
     hibernate:
       ddl-auto: update
     show-sql: true

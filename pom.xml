@@ -33,6 +33,7 @@
 	<modules>
 			<module>AuthService</module>
 			<module>DataService</module>
+			<module>Gateway</module>
 	</modules>
 	<dependencies>
 		<dependency>

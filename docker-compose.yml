@@ -2,7 +2,7 @@ services:
 
   postgres:
       image: postgres:16
-      container_name: postgres-auth
+      container_name: postgres-db
       restart: always
 
       environment:
@@ -10,8 +10,8 @@ services:
         POSTGRES_PASSWORD: admin123
         POSTGRES_DB: authdb
 
-      ports:
-        - "5432:5432"
+      networks:
+        - internal
 
       volumes:
         - postgres_data:/var/lib/postgresql/data/
@@ -19,14 +19,54 @@ services:
 
   redis:
     image: redis:7
-    container_name: redis-auth
+    container_name: redis-db
     restart: always
-
-    ports:
-      - "6379:6379"
+    networks:
+      - internal
     volumes:
       - redis_data:/data
+
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/authdb
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+      SPRING_REDIS_HOST: redis-db
+      SPRING_REDIS_PORT: 6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - internal
+
+  data-service:
+    build:
+      context: ./data-service
+      dockerfile: Dockerfile
+    container_name: data-service
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/datadb
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+      SPRING_REDIS_HOST: redis-db
+      SPRING_REDIS_PORT: 6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - internal
 
 volumes:
   postgres_data:
   redis_data:
+
+networks:
+  internal:
+    internal: true

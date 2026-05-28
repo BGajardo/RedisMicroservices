@@ -1,1 +1,2 @@
 CREATE DATABASE datadb;
+CREATE DATABASE authdb;

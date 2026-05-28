@@ -42,7 +42,7 @@ public class AuthService {
     }
 
     public void logout(String token){
-       long expiration = 15 * 60 * 1000;
+       long expiration = jwtService.extractExpiration(token);
        tokenBlacklistService.blacklist(token, expiration);
     }
 

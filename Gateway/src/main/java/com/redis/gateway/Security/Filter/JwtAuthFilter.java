@@ -1,0 +1,64 @@
+package com.redis.gateway.Security.Filter;
+
+
+import com.redis.gateway.Service.JwtService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cloud.gateway.filter.GatewayFilter;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+@Component
+@RequiredArgsConstructor
+public class JwtAuthFilter implements GatewayFilter {
+
+    private final JwtService jwtService;
+    private final ReactiveRedisTemplate<String, String> redisTemplate;
+
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain){
+        ServerHttpRequest request = exchange.getRequest();
+        String path = request.getPath().toString();
+
+        // publicas
+        if(path.startsWith("/auth/register") || path.startsWith("/auth/login")){
+            return chain.filter(exchange);
+        }
+
+        String authHeader = request.getHeaders().getFirst("Authorization");
+
+        if(authHeader == null || !authHeader.startsWith("Bearer ")){
+            return unauthorized(exchange);
+        }
+
+        String token = authHeader.substring(7);
+
+        if(!jwtService.isTokenValid(token)){
+            return unauthorized(exchange);
+        }
+
+        return redisTemplate.hasKey("blacklist:"+token)
+                .flatMap(isBlacklisted -> {
+                    if(isBlacklisted){
+                        return unauthorized(exchange);
+                    }
+
+                    String username = jwtService.extractUsername(token);
+                    ServerHttpRequest mutatedRequest = request.mutate().header("X-User-Name", username).build();
+
+                    return chain.filter(exchange.mutate().request(mutatedRequest).build());
+                });
+
+    }
+
+
+    private Mono<Void> unauthorized(ServerWebExchange exchange){
+        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+        return exchange.getResponse().setComplete();
+    }
+
+}

@@ -2,6 +2,7 @@ package com.redis.AuthService.Controller;
 
 import com.redis.AuthService.DTO.AuthResponse;
 import com.redis.AuthService.DTO.LoginRequest;
+import com.redis.AuthService.DTO.RefreshRequest;
 import com.redis.AuthService.DTO.RegisterRequest;
 import com.redis.AuthService.Service.AuthService;
 import org.springframework.security.core.Authentication;
@@ -25,13 +26,13 @@ public class AuthController {
 
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest req){
-        String token = authService.login(req);
-        return new AuthResponse(token);
+        return authService.login(req);
     }
+
     @PostMapping("/logout")
-    public void logout(@RequestHeader("Authorization") String authHeader){
-        String token = authHeader.replace("Bearer ", "");
-        authService.logout(token);
+    public void logout(@RequestHeader("Authorization") String authHeader, @RequestBody RefreshRequest req){
+        String accessToken = authHeader.replace("Bearer ", "");
+        authService.logout(accessToken, req.getRefreshToken());
     }
 
     @GetMapping("/profile")

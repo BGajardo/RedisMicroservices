@@ -48,9 +48,16 @@ public class JwtAuthFilter implements GatewayFilter {
                     }
 
                     String username = jwtService.extractUsername(token);
-                    ServerHttpRequest mutatedRequest = request.mutate().header("X-User-Name", username).build();
 
-                    return chain.filter(exchange.mutate().request(mutatedRequest).build());
+                    return  redisTemplate.opsForValue().get("jwt:"+ username)
+                            .defaultIfEmpty("")
+                            .flatMap(activeToken -> {
+                                if(!activeToken.equals(token)){
+                                    return unauthorized(exchange);
+                                }
+                                ServerHttpRequest mutatedRequest = request.mutate().header("X-User-Name", username).build();
+                                return chain.filter(exchange.mutate().request(mutatedRequest).build());
+                            });
                 });
 
     }

@@ -10,6 +10,7 @@ import java.time.Instant;
 public class TokenBlacklistService {
 
     private static final String BLACKLIST_PREFIX = "blacklist:";
+    private static final String ACTIVE_PREFIX = "jwt:";
 
     private final RedisTemplate<String, String> redisTemplate;
 
@@ -19,6 +20,10 @@ public class TokenBlacklistService {
 
     private String buildKey(String token){
         return BLACKLIST_PREFIX + token;
+    }
+
+    private String buildActiveKey(String username){
+        return ACTIVE_PREFIX + username;
     }
 
 
@@ -37,5 +42,18 @@ public class TokenBlacklistService {
         return Boolean.TRUE.equals(redisTemplate.hasKey(buildKey(token)));
     }
 
+    public void saveActiveToken(String username, String token, long expirationMillis){
+        redisTemplate.opsForValue().set(
+            buildActiveKey(username), token, Duration.ofMillis(expirationMillis)
+        );
+    }
+
+    public String getActiveToken(String username){
+        return redisTemplate.opsForValue().get(buildActiveKey(username));
+    }
+
+    public void removeActiveToken(String username){
+        redisTemplate.delete(buildActiveKey(username));
+    }
 
 }

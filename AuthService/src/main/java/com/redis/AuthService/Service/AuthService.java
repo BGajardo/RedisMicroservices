@@ -42,6 +42,10 @@ public class AuthService {
         }
         String accessToken =  jwtService.generateToken(user.getUsername());
         String refreshToken = refreshTokenService.create(user.getUsername()).getToken();
+
+        long expiration = jwtService.extractExpiration(accessToken);
+        tokenBlacklistService.saveActiveToken(user.getUsername(), accessToken, expiration);
+
         return new AuthResponse(accessToken, refreshToken);
     }
 

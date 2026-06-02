@@ -2,12 +2,13 @@ package com.redis.AuthService.Service;
 
 import com.redis.AuthService.Entity.RefreshToken;
 import com.redis.AuthService.Repository.RefreshTokenRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenService {

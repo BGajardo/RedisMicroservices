@@ -5,6 +5,7 @@ import com.redis.AuthService.DTO.LoginRequest;
 import com.redis.AuthService.DTO.RefreshRequest;
 import com.redis.AuthService.DTO.RegisterRequest;
 import com.redis.AuthService.Service.AuthService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +35,12 @@ public class AuthController {
         String accessToken = authHeader.replace("Bearer ", "");
         authService.logout(accessToken, req.getRefreshToken());
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshRequest req){
+        return ResponseEntity.ok(authService.refreshToken(req.getRefreshToken()));
+    }
+
 
     @GetMapping("/profile")
     public String profile(Authentication authentication){

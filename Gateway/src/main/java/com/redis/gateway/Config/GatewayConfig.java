@@ -17,7 +17,7 @@ public class GatewayConfig {
     public RouteLocator routeLocator(RouteLocatorBuilder builder){
         return builder.routes()
                 .route("auth-public", r -> r.path("/auth/login", "/auth/register").uri("http://auth-service:8081"))
-                .route("auth-private", r -> r.path("/auth/logout","/auth/profile").filters(f -> f.filter(jwtAuthFilter)).uri("http://auth-service:8081"))
+                .route("auth-private", r -> r.path("/auth/logout","/auth/profile", "/auth/refresh").filters(f -> f.filter(jwtAuthFilter)).uri("http://auth-service:8081"))
                 .route("data-service", r -> r.path("/api/products/**").filters(f -> f.filter(jwtAuthFilter)).uri("http://data-service:8082"))
                 .build();
     }

@@ -53,6 +53,10 @@ public class AuthService {
     public AuthResponse refreshToken(String refreshToken){
         RefreshToken token = refreshTokenService.validate(refreshToken);
         String accessToken = jwtService.generateToken(token.getUsername());
+
+        long expiration = jwtService.extractExpiration(accessToken);
+        tokenBlacklistService.saveActiveToken(token.getUsername(), accessToken, expiration);
+
         return new AuthResponse(accessToken, refreshToken);
     }
 
@@ -62,6 +66,7 @@ public class AuthService {
        long expiration = jwtService.extractExpiration(accessToken);
        tokenBlacklistService.blacklist(accessToken, expiration);
        String username = jwtService.extractUsername(accessToken);
+       tokenBlacklistService.removeActiveToken(username);
        refreshTokenService.revoke(username);
     }
 

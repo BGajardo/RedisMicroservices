@@ -41,7 +41,6 @@ public class AuthController {
         return ResponseEntity.ok(authService.refreshToken(req.getRefreshToken()));
     }
 
-
     @GetMapping("/profile")
     public String profile(Authentication authentication){
         return "Authenticated user: "+authentication.getName();

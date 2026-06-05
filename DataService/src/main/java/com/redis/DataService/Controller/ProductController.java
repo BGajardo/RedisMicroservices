@@ -3,6 +3,7 @@ package com.redis.DataService.Controller;
 import com.redis.DataService.DTO.RequestProduct;
 import com.redis.DataService.Entity.Product;
 import com.redis.DataService.Service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class ProductController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Product> saveProduct(@RequestBody RequestProduct product){
+    public ResponseEntity<Product> saveProduct(@RequestBody @Valid RequestProduct  product){
         return ResponseEntity.ok(productService.save(product));
     }
 

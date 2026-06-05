@@ -20,3 +20,6 @@ spring:
     redis:
       host: localhost
       port: 6379
+
+jwt:
+  secret: la-clave-secreta-de-jwt-1234-con-minimo-de-32-caracteres

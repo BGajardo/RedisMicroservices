@@ -3,6 +3,7 @@ package com.redis.AuthService.Service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -12,8 +13,10 @@ import java.util.Date;
 @Service
 public class JwtService {
 
+    @Value("${jwt.secret}")
+    private String SECRET;
+
     private SecretKey getSigningKey() {
-        String SECRET = "la-clave-secreta-de-jwt-1234-con-minimo-de-32-caracteres";
         return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
     }
 

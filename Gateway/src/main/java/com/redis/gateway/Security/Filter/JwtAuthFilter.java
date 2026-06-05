@@ -5,12 +5,16 @@ import com.redis.gateway.Service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+
+import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
@@ -25,7 +29,7 @@ public class JwtAuthFilter implements GatewayFilter {
         String path = request.getPath().toString();
 
         // publicas
-        if(path.startsWith("/auth/register") || path.startsWith("/auth/login")){
+        if(path.startsWith("/auth/register") || path.startsWith("/auth/login") || path.startsWith("/auth/refresh")){
             return chain.filter(exchange);
         }
 
@@ -65,7 +69,21 @@ public class JwtAuthFilter implements GatewayFilter {
 
     private Mono<Void> unauthorized(ServerWebExchange exchange){
         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-        return exchange.getResponse().setComplete();
+        exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+        String body = """
+                {
+                "status": 401,
+                "message": "Unauthorized",
+                "timestamp" : "%s"
+                }
+                """.formatted(Instant.now().toString());
+
+        DataBuffer buffer = exchange.getResponse()
+                .bufferFactory()
+                .wrap(body.getBytes());
+
+        return exchange.getResponse().writeWith(Mono.just(buffer));
     }
 
 }

@@ -2,6 +2,7 @@ package com.redis.DataService.Service;
 
 import com.redis.DataService.DTO.RequestProduct;
 import com.redis.DataService.Entity.Product;
+import com.redis.DataService.Exception.ProductNotFoundException;
 import com.redis.DataService.Repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +22,8 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public Optional<Product> findById(Long id){
-        return productRepository.findById(id);
+    public Product findById(Long id){
+        return productRepository.findById(id).orElseThrow(() -> new ProductNotFoundException(id));
     }
 
     public List<Product> findByName(String name){

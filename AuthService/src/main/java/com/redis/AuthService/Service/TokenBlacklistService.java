@@ -1,5 +1,6 @@
 package com.redis.AuthService.Service;
 
+import com.redis.AuthService.Exception.InvalidTokenException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -29,10 +30,10 @@ public class TokenBlacklistService {
 
     public void blacklist(String token, long expirationMillis){
         if(token == null || token.isBlank()){
-            throw new IllegalArgumentException("Token no puede ser nulo o vacio");
+            throw new InvalidTokenException("Token no puede ser nulo o vacio");
         }
         if(expirationMillis <= 0){
-            throw new IllegalArgumentException("La expiracion debe ser positiva");
+            throw new InvalidTokenException("La expiracion debe ser positiva");
         }
         redisTemplate.opsForValue().set(buildKey(token), Instant.now().toString(), Duration.ofMillis(expirationMillis));
     }

@@ -5,6 +5,8 @@ import com.redis.AuthService.DTO.LoginRequest;
 import com.redis.AuthService.DTO.RegisterRequest;
 import com.redis.AuthService.Entity.RefreshToken;
 import com.redis.AuthService.Entity.User;
+import com.redis.AuthService.Exception.InvalidsCredentialsException;
+import com.redis.AuthService.Exception.UserNotFoundException;
 import com.redis.AuthService.Repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,9 +38,9 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest req){
-        User user = userRepository.findByUsername(req.getUsername()).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        User user = userRepository.findByUsername(req.getUsername()).orElseThrow(() -> new UserNotFoundException(req.getUsername()));
         if(!passwordEncoder.matches(req.getPassword(), user.getPassword())){
-            throw new RuntimeException("Credenciales invalidas");
+            throw new InvalidsCredentialsException();
         }
         String accessToken =  jwtService.generateToken(user.getUsername());
         String refreshToken = refreshTokenService.create(user.getUsername()).getToken();

@@ -1,6 +1,7 @@
 package com.redis.AuthService.Service;
 
 import com.redis.AuthService.Entity.RefreshToken;
+import com.redis.AuthService.Exception.InvalidTokenException;
 import com.redis.AuthService.Repository.RefreshTokenRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,14 +28,14 @@ public class RefreshTokenService {
 
     public RefreshToken validate(String token){
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Refresh Token Invalido"));
+                .orElseThrow(() -> new InvalidTokenException("Refresh Token Invalido"));
 
         if(refreshToken.isRevoked()){
-            throw new RuntimeException("Refresh Token Revocado");
+            throw new InvalidTokenException("Refresh Token Revocado");
         }
 
         if (refreshToken.getExpiresAt().isBefore(LocalDateTime.now())){
-            throw new RuntimeException("Refresh Token Expirado");
+            throw new InvalidTokenException("Refresh Token Expirado");
         }
 
         return refreshToken;

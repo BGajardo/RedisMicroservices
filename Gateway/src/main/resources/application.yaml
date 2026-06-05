@@ -16,7 +16,7 @@ spring:
             - id: auth-public
               uri: http://auth-service:8081
               predicates:
-                - Path=/auth/login, /auth/register
+                - Path=/auth/login, /auth/register, /auth/refresh
 
             - id: auth-private
               uri: http://auth-service:8081

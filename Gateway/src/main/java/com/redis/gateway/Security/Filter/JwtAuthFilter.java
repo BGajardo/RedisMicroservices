@@ -3,6 +3,7 @@ package com.redis.gateway.Security.Filter;
 
 import com.redis.gateway.Service.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -16,6 +17,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter implements GatewayFilter {
@@ -30,24 +32,28 @@ public class JwtAuthFilter implements GatewayFilter {
 
         // publicas
         if(path.startsWith("/auth/register") || path.startsWith("/auth/login") || path.startsWith("/auth/refresh")){
+            log.debug("Path publica, omitiendo validacion JWT: {}", path);
             return chain.filter(exchange);
         }
 
         String authHeader = request.getHeaders().getFirst("Authorization");
 
         if(authHeader == null || !authHeader.startsWith("Bearer ")){
+            log.warn("Header Authorization ausente o invalido: {}", path);
             return unauthorized(exchange);
         }
 
         String token = authHeader.substring(7);
 
         if(!jwtService.isTokenValid(token)){
+            log.warn("Token invalido para la ruta: {}", path);
             return unauthorized(exchange);
         }
 
         return redisTemplate.hasKey("blacklist:"+token)
                 .flatMap(isBlacklisted -> {
                     if(isBlacklisted){
+                        log.warn("Intento con token en blacklist para la ruta : {}", path);
                         return unauthorized(exchange);
                     }
 
@@ -57,8 +63,10 @@ public class JwtAuthFilter implements GatewayFilter {
                             .defaultIfEmpty("")
                             .flatMap(activeToken -> {
                                 if(!activeToken.equals(token)){
+                                    log.warn("Token no activo para el usuario para la ruta: {}", path);
                                     return unauthorized(exchange);
                                 }
+                                log.info("Request autorizada para usuario: {} ruta: {}", username, path);
                                 ServerHttpRequest mutatedRequest = request.mutate().header("X-User-Name", username).build();
                                 return chain.filter(exchange.mutate().request(mutatedRequest).build());
                             });

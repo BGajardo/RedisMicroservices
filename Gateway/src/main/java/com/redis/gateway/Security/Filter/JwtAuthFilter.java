@@ -31,7 +31,7 @@ public class JwtAuthFilter implements GatewayFilter {
         String path = request.getPath().toString();
 
         // publicas
-        if(path.startsWith("/auth/register") || path.startsWith("/auth/login") || path.startsWith("/auth/refresh")){
+        if(path.startsWith("/auth/register") || path.startsWith("/auth/login") || path.startsWith("/auth/refresh") || path.startsWith("/auth/health") || path.startsWith("/data/health") ){
             log.debug("Path publica, omitiendo validacion JWT: {}", path);
             return chain.filter(exchange);
         }

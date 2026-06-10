@@ -17,6 +17,12 @@ services:
         - postgres_data:/var/lib/postgresql/data/
         - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U admin -d authdb"]
+        interval: 10s
+        timeout: 5s
+        retries: 3
+
   redis:
     image: redis:7
     container_name: redis-db
@@ -25,6 +31,11 @@ services:
       - internal
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 
   auth-service:
@@ -41,10 +52,20 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
       JWT_SECRET: ${JWT_SECRET}
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - internal
+
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
 
   data-service:
     build:
@@ -60,10 +81,18 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
       JWT_SECRET: ${JWT_SECRET}
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - internal
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
 
   gateway:
@@ -79,9 +108,12 @@ services:
         SPRING_DATA_REDIS_PORT: 6379
         JWT_SECRET: ${JWT_SECRET}
     depends_on:
-      - auth-service
-      - data-service
-      - redis
+      auth-service:
+        condition: service_healthy
+      data-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - internal
 

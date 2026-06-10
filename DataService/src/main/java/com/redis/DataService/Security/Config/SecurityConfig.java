@@ -1,4 +1,4 @@
-package com.redis.DataService.Security.Filter.Config;
+package com.redis.DataService.Security.Config;
 
 import com.redis.DataService.Security.Filter.jwtFilter;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +26,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/health").permitAll()
                 .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

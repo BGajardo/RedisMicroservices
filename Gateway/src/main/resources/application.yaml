@@ -28,5 +28,19 @@ spring:
               predicates:
                 - Path=/api/**
 
+            - id: auth-health
+              uri: http://auth-service:8081
+              predicates:
+                - Path=/auth/health
+              filters:
+                - RewritePath=/auth/health, /actuator/health
+
+            - id: data-health
+              uri: http://data-service:8082
+              predicates:
+                - Path=/data/health
+              filters:
+                - RewritePath=/data/health, /actuator/health
+
 jwt:
   secret: la-clave-secreta-de-jwt-1234-con-minimo-de-32-caracteres

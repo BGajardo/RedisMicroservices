@@ -16,3 +16,13 @@ spring:
 
 jwt:
   secret: la-clave-secreta-de-jwt-1234-con-minimo-de-32-caracteres
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always

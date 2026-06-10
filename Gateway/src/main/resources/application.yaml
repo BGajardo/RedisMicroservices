@@ -8,39 +8,5 @@ spring:
     redis:
       host: redis
       port: 6379
-  cloud:
-    gateway:
-      server:
-        webflux:
-          routes:
-            - id: auth-public
-              uri: http://auth-service:8081
-              predicates:
-                - Path=/auth/login, /auth/register, /auth/refresh
-
-            - id: auth-private
-              uri: http://auth-service:8081
-              predicates:
-                - Path=/auth/logout, /auth/profile
-
-            - id: data-service
-              uri: http://data-service:8082
-              predicates:
-                - Path=/api/**
-
-            - id: auth-health
-              uri: http://auth-service:8081
-              predicates:
-                - Path=/auth/health
-              filters:
-                - RewritePath=/auth/health, /actuator/health
-
-            - id: data-health
-              uri: http://data-service:8082
-              predicates:
-                - Path=/data/health
-              filters:
-                - RewritePath=/data/health, /actuator/health
-
 jwt:
   secret: la-clave-secreta-de-jwt-1234-con-minimo-de-32-caracteres

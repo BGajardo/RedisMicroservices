@@ -1,7 +1,10 @@
 package com.redis.gateway.Config;
 
+import com.redis.gateway.Security.Filter.IPBanFilter;
 import com.redis.gateway.Security.Filter.JwtAuthFilter;
+import com.redis.gateway.Service.IpBanService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
@@ -9,7 +12,9 @@ import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import reactor.core.publisher.Mono;
 
+@Log4j2
 @Configuration
 public class GatewayConfig {
 
@@ -19,19 +24,24 @@ public class GatewayConfig {
     private final RedisRateLimiter loginRateLimiter;
     private final RedisRateLimiter registerRateLimiter;
     private final RedisRateLimiter apiRateLimiter;
-
+    private final IpBanService ipBanService;
+    private final IPBanFilter ipBanFilter;
 
     public GatewayConfig(
             JwtAuthFilter jwtAuthFilter,
             KeyResolver ipKeyResolver,
+            IPBanFilter ipBanFilter,
             @Qualifier("loginRateLimiter") RedisRateLimiter loginRateLimiter,
             @Qualifier("registerRateLimiter") RedisRateLimiter registerRateLimiter,
-            @Qualifier("apiRateLimiter") RedisRateLimiter apiRateLimiter) {
+            @Qualifier("apiRateLimiter") RedisRateLimiter apiRateLimiter,
+            IpBanService ipBanService) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.ipKeyResolver = ipKeyResolver;
         this.loginRateLimiter = loginRateLimiter;
         this.registerRateLimiter = registerRateLimiter;
         this.apiRateLimiter = apiRateLimiter;
+        this.ipBanService = ipBanService;
+        this.ipBanFilter = ipBanFilter;
     }
 
     @Bean
@@ -41,12 +51,14 @@ public class GatewayConfig {
                 .route("auth-login", r -> r
                         .path("/auth/login")
                         .filters(f -> f
+                                .filter(ipBanFilter)
                                 .requestRateLimiter(config -> config
                                         .setRateLimiter(loginRateLimiter)
                                         .setKeyResolver(ipKeyResolver)
                                         .setDenyEmptyKey(false)
-                                ))
-                        .uri("http://auth-service:8081")
+                                )
+
+                        ).uri("http://auth-service:8081")
                 )
                 .route("auth-register", r -> r
                         .path("/auth/register")

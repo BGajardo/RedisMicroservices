@@ -24,7 +24,7 @@ public class GatewayConfig {
     private final RedisRateLimiter loginRateLimiter;
     private final RedisRateLimiter registerRateLimiter;
     private final RedisRateLimiter apiRateLimiter;
-    private final IpBanService ipBanService;
+
     private final IPBanFilter ipBanFilter;
 
     public GatewayConfig(
@@ -33,14 +33,13 @@ public class GatewayConfig {
             IPBanFilter ipBanFilter,
             @Qualifier("loginRateLimiter") RedisRateLimiter loginRateLimiter,
             @Qualifier("registerRateLimiter") RedisRateLimiter registerRateLimiter,
-            @Qualifier("apiRateLimiter") RedisRateLimiter apiRateLimiter,
-            IpBanService ipBanService) {
+            @Qualifier("apiRateLimiter") RedisRateLimiter apiRateLimiter) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.ipKeyResolver = ipKeyResolver;
         this.loginRateLimiter = loginRateLimiter;
         this.registerRateLimiter = registerRateLimiter;
         this.apiRateLimiter = apiRateLimiter;
-        this.ipBanService = ipBanService;
+
         this.ipBanFilter = ipBanFilter;
     }
 
@@ -68,7 +67,7 @@ public class GatewayConfig {
                                         .setKeyResolver(ipKeyResolver)
                                         .setDenyEmptyKey(false)
                                 ))
-                        .uri("http://auth.service:8081")
+                        .uri("http://auth-service:8081")
                 )
                 .route("auth-public", r -> r.path("/auth/refresh").uri("http://auth-service:8081"))
                 .route("auth-private", r -> r.path("/auth/logout","/auth/profile").filters(f -> f.filter(jwtAuthFilter)).uri("http://auth-service:8081"))

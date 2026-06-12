@@ -8,7 +8,7 @@ export const options = {
 
 export default function (){
     const response = http.post("http://localhost:8080/auth/login", JSON.stringify({
-        username: "user1",
+        username: "test",
         password: "wrongPassword"
     }),{headers: {'Content-Type': 'application/json'}});
 

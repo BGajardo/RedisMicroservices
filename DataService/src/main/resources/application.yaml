@@ -17,6 +17,8 @@ spring:
 jwt:
   secret: la-clave-secreta-de-jwt-1234-con-minimo-de-32-caracteres
 
+openapi:
+  server-url: http://localhost:8080
 
 management:
   endpoints:

@@ -83,6 +83,14 @@ public class GatewayConfig {
                         ).uri("http://data-service:8082"))
                 .route("auth-health", r -> r.path("/auth/health").filters(f -> f.rewritePath("/auth/health", "/actuator/health")).uri("http://auth-service:8081"))
                 .route("data-health", r -> r.path("/data/health").filters(f -> f.rewritePath("/data/health", "/actuator/health")).uri("http://data-service:8082"))
+                .route("auth-docs", r -> r
+                        .path("/auth/v3/api-docs")
+                        .filters(f -> f.rewritePath("/auth/v3/api-docs", "/v3/api-docs"))
+                        .uri("http://auth-service:8081"))
+                .route("data-docs", r -> r
+                        .path("/data/v3/api-docs")
+                        .filters(f -> f.rewritePath("/data/v3/api-docs", "/v3/api-docs"))
+                        .uri("http://data-service:8082"))
                 .build();
     }
 

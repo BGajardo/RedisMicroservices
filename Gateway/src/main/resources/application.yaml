@@ -4,9 +4,21 @@ server:
 spring:
   application:
     name: Gateway
+
   data:
     redis:
       host: redis
       port: 6379
+
 jwt:
   secret: la-clave-secreta-de-jwt-1234-con-minimo-de-32-caracteres
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    urls:
+      - name: Auth Service
+        url: /auth/v3/api-docs
+      - name: Data Service
+        url: /data/v3/api-docs
